@@ -64,7 +64,6 @@
 
         .hidden { display: none !important; }
 
-        /* === 1. 點擊進入頁面 === */
         #entry-screen {
             background: #000;
             z-index: 100;
@@ -206,7 +205,7 @@
 
     <div id="start-screen" class="ui-layer hidden">
         <video id="menu-bg-video" autoplay loop muted playsinline>
-            <source src="videos/menu_bg.mp4" type="video/mp4">
+            <source src="menu_bg.mp4" type="video/mp4">
         </video>
         
         <h1 id="title-text">失落的篇章</h1>
@@ -239,59 +238,58 @@
     };
 
     /* ========================================
-       劇本設定：scrict.png 結構實現
-       第2層: 獸人 / 第3層: 精靈 / 第4層: 科幻大亂鬥 / 第5層: Boss
+       劇本設定：已移除 "videos/" 前綴
     ======================================== */
     const storyConfig = {
         // --- 第 1 層 ---
         "1-1": { 
-            video: "videos/1-1.mp4", nextType: "choice", 
+            video: "1-1.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "進入獸人領地 (左)", en: "Enter Orc Territory" }, nextScene: "2-1" }, 
                 { text: { zh: "潛入獸人營地 (右)", en: "Sneak into Camp" }, nextScene: "2-2" } 
             ] 
         },
 
-        // --- 第 2 層 (獸人) ---
+        // --- 第 2 層 ---
         "2-1": { 
-            video: "videos/2-1.mp4", nextType: "choice", 
+            video: "2-1.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "遭遇精靈斥候 (3-1)", en: "Elf Scout Ahead" }, nextScene: "3-1" }, 
                 { text: { zh: "遭遇精靈法師 (3-2)", en: "Elf Mage Ahead" }, nextScene: "3-2" } 
             ] 
         },
         "2-2": { 
-            video: "videos/2-2.mp4", nextType: "choice", 
+            video: "2-2.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "精靈森林入口 (3-3)", en: "Forest Entrance" }, nextScene: "3-3" }, 
                 { text: { zh: "精靈古老遺跡 (3-4)", en: "Ancient Ruins" }, nextScene: "3-4" } 
             ] 
         },
 
-        // --- 第 3 層 (精靈) ---
+        // --- 第 3 層 ---
         "3-1": { 
-            video: "videos/3-1.mp4", nextType: "choice", 
+            video: "3-1.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "穿越蟲洞: CIA總部 (4-1)", en: "Wormhole: CIA HQ" }, nextScene: "4-1" }, 
                 { text: { zh: "時空裂縫: FBI探員 (4-2)", en: "Rift: FBI Agent" }, nextScene: "4-2" } 
             ] 
         },
         "3-2": { 
-            video: "videos/3-2.mp4", nextType: "choice", 
+            video: "3-2.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "傳送門: KGB間諜 (4-3)", en: "Portal: KGB Spy" }, nextScene: "4-3" }, 
                 { text: { zh: "機械降神: 終結者 (4-4)", en: "Deus Ex: Terminator" }, nextScene: "4-4" } 
             ] 
         },
         "3-3": { 
-            video: "videos/3-3.mp4", nextType: "choice", 
+            video: "3-3.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "量子領域: 解放軍 (4-5)", en: "Quantum: PLA" }, nextScene: "4-5" }, 
                 { text: { zh: "空中攔截: 無人機群 (4-6)", en: "Air Raid: Drones" }, nextScene: "4-6" } 
             ] 
         },
         "3-4": { 
-            video: "videos/3-4.mp4", nextType: "choice", 
+            video: "3-4.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "深海喚醒: 雅特蘭提斯 (4-7)", en: "Awaken: Atlantis" }, nextScene: "4-7" }, 
                 { text: { zh: "墓地復甦: 不死族 (4-8)", en: "Graveyard: Undead" }, nextScene: "4-8" } 
@@ -299,75 +297,64 @@
         },
 
         // --- 第 4 層 (完全依照您的文字指令修正) ---
-
-        // 4-1 = 5-6 (死) & 5-1 (魔王A)
         "4-1": { 
-            video: "videos/4-1.mp4", nextType: "choice", 
+            video: "4-1.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "被逮捕 -> 監禁結局 (5-6)", en: "Arrested -> Fail (5-6)" }, nextScene: "5-6" }, 
                 { text: { zh: "殺出重圍 -> 決戰魔王A (5-1)", en: "Fight -> Boss A (5-1)" }, nextScene: "5-1" } 
             ] 
         },
 
-        // 4-2 = 5-7 (死) & 5-1 (魔王A)
         "4-2": { 
-            video: "videos/4-2.mp4", nextType: "choice", 
+            video: "4-2.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "通緝逃亡 -> 亂槍結局 (5-7)", en: "Wanted -> Fail (5-7)" }, nextScene: "5-7" }, 
                 { text: { zh: "駭入系統 -> 決戰魔王A (5-1)", en: "Hack -> Boss A (5-1)" }, nextScene: "5-1" } 
             ] 
         },
 
-        // 4-3 = 5-6 (死) & 5-2 (魔王B)
-        // 注意：這裡借用了 5-6 (原本是CIA監禁結局)，代表 KGB 也會被抓
         "4-3": { 
-            video: "videos/4-3.mp4", nextType: "choice", 
+            video: "4-3.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "身分敗露 -> 監禁結局 (5-6)", en: "Exposed -> Fail (5-6)" }, nextScene: "5-6" }, 
                 { text: { zh: "完成任務 -> 挑戰魔王B (5-2)", en: "Mission -> Boss B (5-2)" }, nextScene: "5-2" } 
             ] 
         },
 
-        // 4-4 = 5-7 (死) & 5-2 (魔王B)
-        // 注意：這裡借用了 5-7 (原本是FBI亂槍結局)，代表終結者也被摧毀
         "4-4": { 
-            video: "videos/4-4.mp4", nextType: "choice", 
+            video: "4-4.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "系統崩潰 -> 亂槍結局 (5-7)", en: "System Fail -> Fail (5-7)" }, nextScene: "5-7" }, 
                 { text: { zh: "執行指令 -> 挑戰魔王B (5-2)", en: "Execute -> Boss B (5-2)" }, nextScene: "5-2" } 
             ] 
         },
 
-        // 4-5 = 5-3 (巨龍A) & 5-8 (死)
         "4-5": { 
-            video: "videos/4-5.mp4", nextType: "choice", 
+            video: "4-5.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "火力覆蓋 -> 寒霜巨龍A (5-3)", en: "Firepower -> Dragon A (5-3)" }, nextScene: "5-3" }, 
                 { text: { zh: "渡河失敗 -> 溺水結局 (5-8)", en: "Drown -> Fail (5-8)" }, nextScene: "5-8" } 
             ] 
         },
 
-        // 4-6 = 5-3 (巨龍A) & 5-5 (死)
         "4-6": { 
-            video: "videos/4-6.mp4", nextType: "choice", 
+            video: "4-6.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "自殺攻擊 -> 寒霜巨龍A (5-3)", en: "Kamikaze -> Dragon A (5-3)" }, nextScene: "5-3" }, 
                 { text: { zh: "墜落墓地 -> 不死結局 (5-5)", en: "Crash -> Fail (5-5)" }, nextScene: "5-5" } 
             ] 
         },
 
-        // 4-7 = 5-4 (巨龍B) & 5-8 (死)
         "4-7": { 
-            video: "videos/4-7.mp4", nextType: "choice", 
+            video: "4-7.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "深海召喚 -> 寒霜巨龍B (5-4)", en: "Summon -> Dragon B (5-4)" }, nextScene: "5-4" }, 
                 { text: { zh: "氧氣耗盡 -> 溺水結局 (5-8)", en: "Oxygen Low -> Fail (5-8)" }, nextScene: "5-8" } 
             ] 
         },
 
-        // 4-8 = 5-4 (巨龍B) & 5-5 (死)
         "4-8": { 
-            video: "videos/4-8.mp4", nextType: "choice", 
+            video: "4-8.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "靈魂獻祭 -> 寒霜巨龍B (5-4)", en: "Sacrifice -> Dragon B (5-4)" }, nextScene: "5-4" }, 
                 { text: { zh: "感染屍毒 -> 不死結局 (5-5)", en: "Infected -> Fail (5-5)" }, nextScene: "5-5" } 
@@ -375,39 +362,40 @@
         },
 
         // --- 第 4 層的失敗結局 ---
-        "5-5": { video: "videos/5-5.mp4", nextType: "ending_modal", modalData: { message: { zh: "你變成了不死族的一員<br>永遠徘徊在墓地", en: "You joined the Undead." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        "5-6": { video: "videos/5-6.mp4", nextType: "ending_modal", modalData: { message: { zh: "CIA將你關進了黑牢<br>冒險結束", en: "Captured by CIA." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        "5-7": { video: "videos/5-7.mp4", nextType: "ending_modal", modalData: { message: { zh: "FBI攻堅失敗<br>你死於亂槍之中", en: "Killed in FBI Raid." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        "5-8": { video: "videos/5-8.mp4", nextType: "ending_modal", modalData: { message: { zh: "雅特蘭提斯的深海<br>是你最後的歸宿", en: "Lost in the Deep." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-5": { video: "5-5.mp4", nextType: "ending_modal", modalData: { message: { zh: "你變成了不死族的一員<br>永遠徘徊在墓地", en: "You joined the Undead." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-6": { video: "5-6.mp4", nextType: "ending_modal", modalData: { message: { zh: "CIA將你關進了黑牢<br>冒險結束", en: "Captured by CIA." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-7": { video: "5-7.mp4", nextType: "ending_modal", modalData: { message: { zh: "FBI攻堅失敗<br>你死於亂槍之中", en: "Killed in FBI Raid." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-8": { video: "5-8.mp4", nextType: "ending_modal", modalData: { message: { zh: "雅特蘭提斯的深海<br>是你最後的歸宿", en: "Lost in the Deep." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
 
-        // --- 第 5 層 (Boss戰) ---
-        // 5-1 (大魔王A): 橙色線去6-3(死), 黑色線去6-1(Good)
+        // --- 第 5 層 (Boss戰 - 包含 6-5 逃跑選項) ---
         "5-1": { 
-            video: "videos/5-1.mp4", nextType: "choice", 
+            video: "5-1.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "斬殺魔王 -> 國王表揚 (6-1)", en: "Slay Demon -> Good End" }, nextScene: "6-1" }, 
-                { text: { zh: "力氣用盡 -> 戰死沙場 (6-3)", en: "Exhausted -> Fail" }, nextScene: "6-3" } 
+                { text: { zh: "力氣用盡 -> 戰死沙場 (6-3)", en: "Exhausted -> Fail" }, nextScene: "6-3" },
+                { text: { zh: "轉身逃走 -> 獅鷲離去 (6-5)", en: "Flee -> Griffin Leaves" }, nextScene: "6-5" }
             ] 
         },
-        // 5-2 (大魔王B): 橙色線去6-3(死), 黑色線去6-1(Good)
+
         "5-2": { 
-            video: "videos/5-2.mp4", nextType: "choice", 
+            video: "5-2.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "封印魔王 -> 榮耀歸來 (6-1)", en: "Seal Demon -> Good End" }, nextScene: "6-1" }, 
                 { text: { zh: "魔王自爆 -> 同歸於盡 (6-3)", en: "Explosion -> Fail" }, nextScene: "6-3" } 
             ] 
         },
-        // 5-3 (寒霜巨龍A): 黑色線去6-1(Good) 和 6-2(Bad)
+
         "5-3": { 
-            video: "videos/5-3.mp4", nextType: "choice", 
+            video: "5-3.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "馴服巨龍 -> 王國英雄 (6-1)", en: "Tame Dragon -> Good End" }, nextScene: "6-1" }, 
-                { text: { zh: "巨龍詛咒 -> 孤獨一生 (6-2)", en: "Cursed -> Bad End" }, nextScene: "6-2" } 
+                { text: { zh: "巨龍詛咒 -> 孤獨一生 (6-2)", en: "Cursed -> Bad End" }, nextScene: "6-2" },
+                { text: { zh: "放棄戰鬥 -> 獅鷲離去 (6-5)", en: "Flee -> Griffin Leaves" }, nextScene: "6-5" }
             ] 
         },
-        // 5-4 (寒霜巨龍B): 藍色線去6-4(死), 黑色線去6-2(Bad)
+
         "5-4": { 
-            video: "videos/5-4.mp4", nextType: "choice", 
+            video: "5-4.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "獅鳩犧牲 -> 少女倖存 (6-2)", en: "Sacrifice -> Bad End" }, nextScene: "6-2" }, 
                 { text: { zh: "冰封吐息 -> 成為冰雕 (6-4)", en: "Frozen -> Fail" }, nextScene: "6-4" } 
@@ -415,12 +403,25 @@
         },
 
         // --- 第 6 層 (大結局) ---
-        "6-1": { video: "videos/6-1.mp4", nextType: "ending_modal", modalData: { message: { zh: "恭喜！接受國王表揚<br>成為傳奇英雄 (Good End)", en: "Victory! King's Praise.<br>Legendary Hero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        "6-2": { video: "videos/6-2.mp4", nextType: "ending_modal", modalData: { message: { zh: "獅鳩倒在火山口<br>少女孤獨一生 (Bad End)", en: "The Griffin falls.<br>A lonely life awaits." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-1": { video: "6-1.mp4", nextType: "ending_modal", modalData: { message: { zh: "恭喜！接受國王表揚<br>成為傳奇英雄 (Good End)", en: "Victory! King's Praise.<br>Legendary Hero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-2": { video: "6-2.mp4", nextType: "ending_modal", modalData: { message: { zh: "獅鳩倒在火山口<br>少女孤獨一生 (Bad End)", en: "The Griffin falls.<br>A lonely life awaits." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         
-        // 6-3, 6-4 死亡結局
-        "6-3": { video: "videos/6-3.mp4", nextType: "ending_modal", modalData: { message: { zh: "你在最後一刻倒下了<br>世界陷入黑暗", en: "You fell at the end." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        "6-4": { video: "videos/6-4.mp4", nextType: "ending_modal", modalData: { message: { zh: "絕對零度<br>靈魂也被凍結", en: "Absolute Zero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } }
+        "6-3": { video: "6-3.mp4", nextType: "ending_modal", modalData: { message: { zh: "你在最後一刻倒下了<br>世界陷入黑暗", en: "You fell at the end." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-4": { video: "6-4.mp4", nextType: "ending_modal", modalData: { message: { zh: "絕對零度<br>靈魂也被凍結", en: "Absolute Zero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        
+        // 新增 6-5 逃跑結局
+        "6-5": { 
+            video: "6-5.mp4", 
+            nextType: "ending_modal", 
+            modalData: { 
+                message: { 
+                    zh: "夥伴遇見了真愛離你而去<br>你將獨自踏上旅程 (Solo End)", 
+                    en: "Your partner found love and left.<br>You walk the path alone." 
+                }, 
+                btnText: { zh: "回到主畫面", en: "Return to Menu" }, 
+                action: "reset" 
+            } 
+        }
     };
 
     const entryScreen = document.getElementById('entry-screen');
@@ -445,7 +446,9 @@
 
     function playIntro() {
         introVideo.style.display = 'block';
-        introVideo.src = "videos/opening.mp4"; 
+        // 修正：移除 videos/ 前綴
+        introVideo.src = "opening.mp4"; 
+        
         introVideo.muted = false;
         introVideo.play().catch(e => console.log("播放失敗:", e));
 
@@ -491,7 +494,7 @@
         menuBgVideo.pause();
 
         mainVideo.style.display = 'block';
-        playScene("1-1"); // 改為從 1-1 開始
+        playScene("1-1"); 
     }
 
     function goIsland() {
@@ -509,6 +512,7 @@
         if (!sceneData) { console.error("Missing scene:", sceneId); return; }
 
         skipBtn.classList.remove('hidden');
+        // 修正：移除 videos/ 前綴 (已經在 Config 裡拿掉了)
         mainVideo.src = sceneData.video;
         mainVideo.play();
 
