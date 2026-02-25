@@ -45,7 +45,7 @@
             top: 0; left: 0;
         }
 
-        #intro-video { display: none; z-index: 50; }
+        #intro-video { display: block; z-index: 50; }
         #main-video { display: none; z-index: 1; }
         #menu-bg-video { z-index: 0; opacity: 1; }
 
@@ -64,23 +64,15 @@
 
         .hidden { display: none !important; }
 
-        #entry-screen {
-            background: #000;
+        #fallback-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.8);
             z-index: 100;
-            color: white;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             cursor: pointer;
-            transition: opacity 0.5s;
-            padding: 0; 
         }
-        .entry-text {
-            font-family: 'Cinzel', serif;
-            font-size: 18px;
-            letter-spacing: 5px;
-            animation: pulse 2s infinite;
-            text-transform: uppercase;
-            color: #e0c38c;
+        .fallback-text {
+            color: #e0c38c; font-family: 'Cinzel', serif; font-size: 20px; letter-spacing: 4px; border: 1px solid #e0c38c; padding: 15px 30px;
         }
 
         #lang-switch {
@@ -189,8 +181,8 @@
 <div id="game-container">
     <audio id="bgm" loop><source src="bgm.mp3" type="audio/mp3"></audio>
 
-    <div id="entry-screen" class="ui-layer" onclick="startExperience()">
-        <div class="entry-text">CLICK TO ENTER</div>
+    <div id="fallback-overlay" class="hidden">
+        <div class="fallback-text">CLICK TO START</div>
     </div>
 
     <div id="skip-btn" class="hidden" onclick="skipVideo()">SKIP</div>
@@ -200,7 +192,7 @@
         <div class="lang-btn" onclick="setLanguage('en')">EN</div>
     </div>
 
-    <video id="intro-video" playsinline webkit-playsinline></video>
+    <video id="intro-video" playsinline webkit-playsinline muted></video>
     <video id="main-video" playsinline webkit-playsinline></video>
 
     <div id="start-screen" class="ui-layer hidden">
@@ -237,9 +229,6 @@
         en: { title: "Lost Chapter", start: "Start Journey", island: "Return to Island", skip: "SKIP" }
     };
 
-    /* ========================================
-       劇本設定：已移除 "videos/" 前綴
-    ======================================== */
     const storyConfig = {
         // --- 第 1 層 ---
         "1-1": { 
@@ -250,23 +239,25 @@
             ] 
         },
 
-        // --- 第 2 層 ---
+        // --- 第 2 層 (含新增的法師選項) ---
         "2-1": { 
             video: "2-1.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "遭遇精靈斥候 (3-1)", en: "Elf Scout Ahead" }, nextScene: "3-1" }, 
-                { text: { zh: "遭遇精靈法師 (3-2)", en: "Elf Mage Ahead" }, nextScene: "3-2" } 
+                { text: { zh: "遭遇精靈法師 (3-2)", en: "Elf Mage Ahead" }, nextScene: "3-2" },
+                { text: { zh: "尋訪白袍賢者 (3-5)", en: "Visit White Mage" }, nextScene: "3-5" }
             ] 
         },
         "2-2": { 
             video: "2-2.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "精靈森林入口 (3-3)", en: "Forest Entrance" }, nextScene: "3-3" }, 
-                { text: { zh: "精靈古老遺跡 (3-4)", en: "Ancient Ruins" }, nextScene: "3-4" } 
+                { text: { zh: "精靈古老遺跡 (3-4)", en: "Ancient Ruins" }, nextScene: "3-4" },
+                { text: { zh: "尋訪灰袍隱士 (3-6)", en: "Visit Grey Hermit" }, nextScene: "3-6" }
             ] 
         },
 
-        // --- 第 3 層 ---
+        // --- 第 3 層 (含原路線 + 法師塔分支) ---
         "3-1": { 
             video: "3-1.mp4", nextType: "choice", 
             choices: [ 
@@ -296,7 +287,36 @@
             ] 
         },
 
-        // --- 第 4 層 (完全依照您的文字指令修正) ---
+        // 3-5 (法師A): 傳送到 KGB/終結者
+        "3-5": { 
+            video: "3-5.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "接受加護 -> 前往戰場 (4-3)", en: "Accept -> Warp (4-3)" }, nextScene: "4-3" },
+                { text: { zh: "接受力量 -> 前往未來 (4-4)", en: "Accept -> Warp (4-4)" }, nextScene: "4-4" },
+                { text: { zh: "偷竊法師 -> 觸發機關 (3-7)", en: "Steal -> Zap (3-7)" }, nextScene: "3-7" }
+            ] 
+        },
+        // 3-6 (法師B): 傳送到 解放軍/無人機
+        "3-6": { 
+            video: "3-6.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "接受傳送 -> 前往陣地 (4-5)", en: "Accept -> Warp (4-5)" }, nextScene: "4-5" },
+                { text: { zh: "接受支援 -> 前往空域 (4-6)", en: "Accept -> Warp (4-6)" }, nextScene: "4-6" },
+                { text: { zh: "攻擊法師 -> 自取滅亡 (3-7)", en: "Attack -> Zap (3-7)" }, nextScene: "3-7" }
+            ] 
+        },
+        // 3-7 (電死結局)
+        "3-7": { 
+            video: "3-7.mp4", 
+            nextType: "ending_modal", 
+            modalData: { 
+                message: { zh: "貪婪蒙蔽了雙眼<br>你被雷電化為灰燼 (Fail End)", en: "Greed blinded you.<br>Incinerated." }, 
+                btnText: { zh: "回到主畫面", en: "Return to Menu" }, 
+                action: "reset" 
+            } 
+        },
+
+        // --- 第 4 層 (依你的文字邏輯) ---
         "4-1": { 
             video: "4-1.mp4", nextType: "choice", 
             choices: [ 
@@ -304,7 +324,6 @@
                 { text: { zh: "殺出重圍 -> 決戰魔王A (5-1)", en: "Fight -> Boss A (5-1)" }, nextScene: "5-1" } 
             ] 
         },
-
         "4-2": { 
             video: "4-2.mp4", nextType: "choice", 
             choices: [ 
@@ -312,7 +331,6 @@
                 { text: { zh: "駭入系統 -> 決戰魔王A (5-1)", en: "Hack -> Boss A (5-1)" }, nextScene: "5-1" } 
             ] 
         },
-
         "4-3": { 
             video: "4-3.mp4", nextType: "choice", 
             choices: [ 
@@ -320,7 +338,6 @@
                 { text: { zh: "完成任務 -> 挑戰魔王B (5-2)", en: "Mission -> Boss B (5-2)" }, nextScene: "5-2" } 
             ] 
         },
-
         "4-4": { 
             video: "4-4.mp4", nextType: "choice", 
             choices: [ 
@@ -328,7 +345,6 @@
                 { text: { zh: "執行指令 -> 挑戰魔王B (5-2)", en: "Execute -> Boss B (5-2)" }, nextScene: "5-2" } 
             ] 
         },
-
         "4-5": { 
             video: "4-5.mp4", nextType: "choice", 
             choices: [ 
@@ -336,7 +352,6 @@
                 { text: { zh: "渡河失敗 -> 溺水結局 (5-8)", en: "Drown -> Fail (5-8)" }, nextScene: "5-8" } 
             ] 
         },
-
         "4-6": { 
             video: "4-6.mp4", nextType: "choice", 
             choices: [ 
@@ -344,15 +359,13 @@
                 { text: { zh: "墜落墓地 -> 不死結局 (5-5)", en: "Crash -> Fail (5-5)" }, nextScene: "5-5" } 
             ] 
         },
-
         "4-7": { 
             video: "4-7.mp4", nextType: "choice", 
             choices: [ 
-                { text: { zh: "深海召喚 -> 寒霜巨龍B (5-4)", en: "Summon -> Dragon B (5-4)" }, nextScene: "5-4" }, 
-                { text: { zh: "氧氣耗盡 -> 溺水結局 (5-8)", en: "Oxygen Low -> Fail (5-8)" }, nextScene: "5-8" } 
+                { text: { zh: "深海喚醒 -> 寒霜巨龍B (5-4)", en: "Summon -> Dragon B (5-4)" }, nextScene: "5-4" }, 
+                { text: { zh: "氧氣耗盡 -> 溺水結局 (5-8)", en: "Drown -> Fail (5-8)" }, nextScene: "5-8" } 
             ] 
         },
-
         "4-8": { 
             video: "4-8.mp4", nextType: "choice", 
             choices: [ 
@@ -373,10 +386,9 @@
             choices: [ 
                 { text: { zh: "斬殺魔王 -> 國王表揚 (6-1)", en: "Slay Demon -> Good End" }, nextScene: "6-1" }, 
                 { text: { zh: "力氣用盡 -> 戰死沙場 (6-3)", en: "Exhausted -> Fail" }, nextScene: "6-3" },
-                { text: { zh: "轉身逃走 -> 獅鷲離去 (6-5)", en: "Flee -> Griffin Leaves" }, nextScene: "6-5" }
+                { text: { zh: "轉身逃走 -> 獅鷲離去 (6-5)", en: "Flee -> Solo End" }, nextScene: "6-5" }
             ] 
         },
-
         "5-2": { 
             video: "5-2.mp4", nextType: "choice", 
             choices: [ 
@@ -384,16 +396,14 @@
                 { text: { zh: "魔王自爆 -> 同歸於盡 (6-3)", en: "Explosion -> Fail" }, nextScene: "6-3" } 
             ] 
         },
-
         "5-3": { 
             video: "5-3.mp4", nextType: "choice", 
             choices: [ 
                 { text: { zh: "馴服巨龍 -> 王國英雄 (6-1)", en: "Tame Dragon -> Good End" }, nextScene: "6-1" }, 
                 { text: { zh: "巨龍詛咒 -> 孤獨一生 (6-2)", en: "Cursed -> Bad End" }, nextScene: "6-2" },
-                { text: { zh: "放棄戰鬥 -> 獅鷲離去 (6-5)", en: "Flee -> Griffin Leaves" }, nextScene: "6-5" }
+                { text: { zh: "放棄戰鬥 -> 獅鷲離去 (6-5)", en: "Flee -> Solo End" }, nextScene: "6-5" }
             ] 
         },
-
         "5-4": { 
             video: "5-4.mp4", nextType: "choice", 
             choices: [ 
@@ -403,28 +413,13 @@
         },
 
         // --- 第 6 層 (大結局) ---
-        "6-1": { video: "6-1.mp4", nextType: "ending_modal", modalData: { message: { zh: "恭喜！接受國王表揚<br>成為傳奇英雄 (Good End)", en: "Victory! King's Praise.<br>Legendary Hero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        "6-2": { video: "6-2.mp4", nextType: "ending_modal", modalData: { message: { zh: "獅鳩倒在火山口<br>少女孤獨一生 (Bad End)", en: "The Griffin falls.<br>A lonely life awaits." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        
-        "6-3": { video: "6-3.mp4", nextType: "ending_modal", modalData: { message: { zh: "你在最後一刻倒下了<br>世界陷入黑暗", en: "You fell at the end." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-1": { video: "6-1.mp4", nextType: "ending_modal", modalData: { message: { zh: "恭喜！接受國王表揚<br>成為傳奇英雄 (Good End)", en: "Legendary Hero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-2": { video: "6-2.mp4", nextType: "ending_modal", modalData: { message: { zh: "獅鳩倒在火山口<br>少女孤獨一生 (Bad End)", en: "Lonely life." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-3": { video: "6-3.mp4", nextType: "ending_modal", modalData: { message: { zh: "你在最後一刻倒下了<br>世界陷入黑暗", en: "You fell." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         "6-4": { video: "6-4.mp4", nextType: "ending_modal", modalData: { message: { zh: "絕對零度<br>靈魂也被凍結", en: "Absolute Zero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
-        
-        // 新增 6-5 逃跑結局
-        "6-5": { 
-            video: "6-5.mp4", 
-            nextType: "ending_modal", 
-            modalData: { 
-                message: { 
-                    zh: "夥伴遇見了真愛離你而去<br>你將獨自踏上旅程 (Solo End)", 
-                    en: "Your partner found love and left.<br>You walk the path alone." 
-                }, 
-                btnText: { zh: "回到主畫面", en: "Return to Menu" }, 
-                action: "reset" 
-            } 
-        }
+        "6-5": { video: "6-5.mp4", nextType: "ending_modal", modalData: { message: { zh: "夥伴遇見了真愛離你而去<br>你將獨自踏上旅程 (Solo End)", en: "Your partner left.<br>You walk alone." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } }
     };
 
-    const entryScreen = document.getElementById('entry-screen');
     const introVideo = document.getElementById('intro-video');
     const mainVideo = document.getElementById('main-video');
     const startScreen = document.getElementById('start-screen');
@@ -434,36 +429,52 @@
     const skipBtn = document.getElementById('skip-btn');
     const langSwitch = document.getElementById('lang-switch');
     const bgm = document.getElementById('bgm');
+    const fallbackOverlay = document.getElementById('fallback-overlay');
 
-    // 點擊後觸發：隱藏歡迎頁、播放 Opening
-    function startExperience() {
-        entryScreen.style.opacity = '0'; 
-        setTimeout(() => {
-            entryScreen.style.display = 'none'; 
-            playIntro(); 
-        }, 500);
-    }
+    // ── 自動播放開頭動畫 ──
+    document.addEventListener('DOMContentLoaded', () => {
+        introVideo.src = "opening.mp4";
+        introVideo.muted = true; 
 
-    function playIntro() {
-        introVideo.style.display = 'block';
-        // 修正：移除 videos/ 前綴
-        introVideo.src = "opening.mp4"; 
-        
-        introVideo.muted = false;
-        introVideo.play().catch(e => console.log("播放失敗:", e));
+        const p = introVideo.play();
+        if(p && p.catch){
+            p.catch(e => {
+                fallbackOverlay.classList.remove('hidden');
+                fallbackOverlay.addEventListener('click', () => {
+                    introVideo.play();
+                    fallbackOverlay.classList.add('hidden');
+                }, {once: true});
+            });
+        }
 
         introVideo.onended = function() {
             introVideo.style.display = 'none';
             showMainMenu(); 
         };
-    }
+    });
 
     function showMainMenu() {
         startScreen.classList.remove('hidden');
         langSwitch.classList.remove('hidden');
         menuBgVideo.play();
+        
+        // 修正：主選單時播放背景音樂
         bgm.volume = 0.5;
-        bgm.play().catch(e => console.log("BGM 自動播放被擋"));
+        bgm.play().catch(e => console.log("BGM 自動播放被擋，等待互動"));
+    }
+
+    function startGame() {
+        startScreen.classList.add('hidden');
+        endingModal.classList.add('hidden');
+        
+        // 修正：開始遊戲後，音樂停止
+        bgm.pause();
+        bgm.currentTime = 0;
+        
+        menuBgVideo.pause();
+
+        mainVideo.style.display = 'block';
+        playScene("1-1"); 
     }
 
     function setLanguage(lang) {
@@ -486,22 +497,15 @@
         }
     }
 
-    function startGame() {
-        startScreen.classList.add('hidden');
-        endingModal.classList.add('hidden');
-        bgm.pause();
-        bgm.currentTime = 0;
-        menuBgVideo.pause();
-
-        mainVideo.style.display = 'block';
-        playScene("1-1"); 
-    }
-
     function goIsland() {
         window.location.href = "https://videodennischiu-oss.github.io/island-adventure/";
     }
 
     function skipVideo() {
+        if (introVideo.style.display !== 'none' && !introVideo.paused) {
+            introVideo.dispatchEvent(new Event('ended'));
+            return;
+        }
         if (mainVideo.style.display === 'block' && !mainVideo.paused) {
             mainVideo.dispatchEvent(new Event('ended'));
         }
@@ -512,7 +516,6 @@
         if (!sceneData) { console.error("Missing scene:", sceneId); return; }
 
         skipBtn.classList.remove('hidden');
-        // 修正：移除 videos/ 前綴 (已經在 Config 裡拿掉了)
         mainVideo.src = sceneData.video;
         mainVideo.play();
 
@@ -575,7 +578,10 @@
         mainVideo.style.display = 'none'; 
         mainVideo.src = ""; 
         skipBtn.classList.add('hidden');
+        
         showMainMenu(); 
+        // 修正：回到主選單時，音樂重新播放
+        bgm.play().catch(()=>{}); 
     }
 
     setLanguage(currentLang);
