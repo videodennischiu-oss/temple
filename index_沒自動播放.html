@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"> 
+    <title>Cinematic Interactive Movie</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@300;500;700&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --safe-area-top: 20%; 
+            --safe-area-bottom: 20%;
+        }
+
+        body {
+            margin: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            height: 100dvh; 
+            font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px; 
+            aspect-ratio: 9 / 16;
+            background: #000;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        #intro-video { display: none; z-index: 50; }
+        #main-video { display: none; z-index: 1; }
+        #menu-bg-video { z-index: 0; opacity: 1; }
+
+        .ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+            box-sizing: border-box;
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
+        }
+        .ui-layer > * { pointer-events: auto; }
+
+        .hidden { display: none !important; }
+
+        #entry-screen {
+            background: #000;
+            z-index: 100;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.5s;
+            padding: 0; 
+        }
+        .entry-text {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            letter-spacing: 5px;
+            animation: pulse 2s infinite;
+            text-transform: uppercase;
+            color: #e0c38c;
+        }
+
+        #lang-switch {
+            position: absolute; top: 5%; right: 20px; z-index: 60; display: flex; gap: 15px;
+        }
+        .lang-btn {
+            color: rgba(255, 255, 255, 0.5); font-size: 12px; cursor: pointer; font-weight: 500; letter-spacing: 1px; transition: 0.3s;
+        }
+        .lang-btn.active, .lang-btn:hover {
+            color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.8); border-bottom: 1px solid #fff;
+        }
+
+        #skip-btn {
+            position: absolute; top: 5%; left: 20px; z-index: 60;
+            color: rgba(255, 255, 255, 0.7); font-size: 12px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3); padding: 5px 12px; border-radius: 20px;
+            backdrop-filter: blur(4px); transition: 0.3s;
+        }
+        #skip-btn:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: #fff; }
+
+        #start-screen {
+            justify-content: center; 
+            align-items: center;
+        }
+
+        h1 {
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 48px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 60px; 
+            margin-top: 0;
+            line-height: 1.2;
+            color: #e0c38c;
+            background: linear-gradient(to bottom, #fffcf5 0%, #e0c38c 40%, #b88a4d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 0px rgba(0,0,0,0.5)) drop-shadow(0 0 15px rgba(224, 195, 140, 0.3));
+            border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+            padding-bottom: 10px;
+            width: 80%; 
+        }
+
+        .btn {
+            position: relative;
+            padding: 18px 40px;
+            margin: 12px;
+            width: 70%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            background: linear-gradient(135deg, rgba(30,30,30,0.6), rgba(10,10,10,0.7));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            border-radius: 2px;
+            font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(212, 175, 55, 0.8);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+        }
+        .btn:active { transform: translateY(1px); }
+
+        #choice-screen {
+            background: transparent;
+            justify-content: flex-end; 
+            align-items: center;
+        }
+        #choice-container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+
+        #ending-modal {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            padding: 0;
+        }
+        .modal-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px; width: 70%; text-align: center; color: #fff;
+            animation: fadeIn 0.8s ease;
+        }
+        .modal-title {
+            font-size: 20px; line-height: 1.6; font-weight: 300; margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;
+        }
+        
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <audio id="bgm" loop><source src="bgm.mp3" type="audio/mp3"></audio>
+
+    <div id="entry-screen" class="ui-layer" onclick="startExperience()">
+        <div class="entry-text">CLICK TO ENTER</div>
+    </div>
+
+    <div id="skip-btn" class="hidden" onclick="skipVideo()">SKIP</div>
+
+    <div id="lang-switch" class="hidden">
+        <div class="lang-btn active" onclick="setLanguage('zh')">TW</div>
+        <div class="lang-btn" onclick="setLanguage('en')">EN</div>
+    </div>
+
+    <video id="intro-video" playsinline webkit-playsinline></video>
+    <video id="main-video" playsinline webkit-playsinline></video>
+
+    <div id="start-screen" class="ui-layer hidden">
+        <video id="menu-bg-video" autoplay loop muted playsinline>
+            <source src="menu_bg.mp4" type="video/mp4">
+        </video>
+        
+        <h1 id="title-text">失落的篇章</h1>
+        
+        <div class="btn" onclick="startGame()" id="btn-start">開始旅程</div>
+        <div class="btn" onclick="goIsland()" id="btn-island">回到島嶼</div>
+    </div>
+
+    <div id="choice-screen" class="ui-layer hidden">
+        <div id="choice-container"></div>
+    </div>
+
+    <div id="ending-modal" class="ui-layer hidden">
+        <div class="modal-box">
+            <div class="modal-title" id="ending-text"></div>
+            <div class="btn" id="ending-btn" onclick="handleEndingAction()"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'zh';
+    let currentEndingAction = 'reset'; 
+    let activeChoices = null; 
+    let activeModalData = null;
+
+    const uiText = {
+        zh: { title: "失落的篇章", start: "開始旅程", island: "回到島嶼", skip: "跳過" },
+        en: { title: "Lost Chapter", start: "Start Journey", island: "Return to Island", skip: "SKIP" }
+    };
+
+    /* ========================================
+       劇本設定：已移除 "videos/" 前綴
+    ======================================== */
+    const storyConfig = {
+        // --- 第 1 層 ---
+        "1-1": { 
+            video: "1-1.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "進入獸人領地 (左)", en: "Enter Orc Territory" }, nextScene: "2-1" }, 
+                { text: { zh: "潛入獸人營地 (右)", en: "Sneak into Camp" }, nextScene: "2-2" } 
+            ] 
+        },
+
+        // --- 第 2 層 ---
+        "2-1": { 
+            video: "2-1.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "遭遇精靈斥候 (3-1)", en: "Elf Scout Ahead" }, nextScene: "3-1" }, 
+                { text: { zh: "遭遇精靈法師 (3-2)", en: "Elf Mage Ahead" }, nextScene: "3-2" } 
+            ] 
+        },
+        "2-2": { 
+            video: "2-2.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "精靈森林入口 (3-3)", en: "Forest Entrance" }, nextScene: "3-3" }, 
+                { text: { zh: "精靈古老遺跡 (3-4)", en: "Ancient Ruins" }, nextScene: "3-4" } 
+            ] 
+        },
+
+        // --- 第 3 層 ---
+        "3-1": { 
+            video: "3-1.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "穿越蟲洞: CIA總部 (4-1)", en: "Wormhole: CIA HQ" }, nextScene: "4-1" }, 
+                { text: { zh: "時空裂縫: FBI探員 (4-2)", en: "Rift: FBI Agent" }, nextScene: "4-2" } 
+            ] 
+        },
+        "3-2": { 
+            video: "3-2.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "傳送門: KGB間諜 (4-3)", en: "Portal: KGB Spy" }, nextScene: "4-3" }, 
+                { text: { zh: "機械降神: 終結者 (4-4)", en: "Deus Ex: Terminator" }, nextScene: "4-4" } 
+            ] 
+        },
+        "3-3": { 
+            video: "3-3.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "量子領域: 解放軍 (4-5)", en: "Quantum: PLA" }, nextScene: "4-5" }, 
+                { text: { zh: "空中攔截: 無人機群 (4-6)", en: "Air Raid: Drones" }, nextScene: "4-6" } 
+            ] 
+        },
+        "3-4": { 
+            video: "3-4.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "深海喚醒: 雅特蘭提斯 (4-7)", en: "Awaken: Atlantis" }, nextScene: "4-7" }, 
+                { text: { zh: "墓地復甦: 不死族 (4-8)", en: "Graveyard: Undead" }, nextScene: "4-8" } 
+            ] 
+        },
+
+        // --- 第 4 層 (完全依照您的文字指令修正) ---
+        "4-1": { 
+            video: "4-1.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "被逮捕 -> 監禁結局 (5-6)", en: "Arrested -> Fail (5-6)" }, nextScene: "5-6" }, 
+                { text: { zh: "殺出重圍 -> 決戰魔王A (5-1)", en: "Fight -> Boss A (5-1)" }, nextScene: "5-1" } 
+            ] 
+        },
+
+        "4-2": { 
+            video: "4-2.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "通緝逃亡 -> 亂槍結局 (5-7)", en: "Wanted -> Fail (5-7)" }, nextScene: "5-7" }, 
+                { text: { zh: "駭入系統 -> 決戰魔王A (5-1)", en: "Hack -> Boss A (5-1)" }, nextScene: "5-1" } 
+            ] 
+        },
+
+        "4-3": { 
+            video: "4-3.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "身分敗露 -> 監禁結局 (5-6)", en: "Exposed -> Fail (5-6)" }, nextScene: "5-6" }, 
+                { text: { zh: "完成任務 -> 挑戰魔王B (5-2)", en: "Mission -> Boss B (5-2)" }, nextScene: "5-2" } 
+            ] 
+        },
+
+        "4-4": { 
+            video: "4-4.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "系統崩潰 -> 亂槍結局 (5-7)", en: "System Fail -> Fail (5-7)" }, nextScene: "5-7" }, 
+                { text: { zh: "執行指令 -> 挑戰魔王B (5-2)", en: "Execute -> Boss B (5-2)" }, nextScene: "5-2" } 
+            ] 
+        },
+
+        "4-5": { 
+            video: "4-5.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "火力覆蓋 -> 寒霜巨龍A (5-3)", en: "Firepower -> Dragon A (5-3)" }, nextScene: "5-3" }, 
+                { text: { zh: "渡河失敗 -> 溺水結局 (5-8)", en: "Drown -> Fail (5-8)" }, nextScene: "5-8" } 
+            ] 
+        },
+
+        "4-6": { 
+            video: "4-6.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "自殺攻擊 -> 寒霜巨龍A (5-3)", en: "Kamikaze -> Dragon A (5-3)" }, nextScene: "5-3" }, 
+                { text: { zh: "墜落墓地 -> 不死結局 (5-5)", en: "Crash -> Fail (5-5)" }, nextScene: "5-5" } 
+            ] 
+        },
+
+        "4-7": { 
+            video: "4-7.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "深海召喚 -> 寒霜巨龍B (5-4)", en: "Summon -> Dragon B (5-4)" }, nextScene: "5-4" }, 
+                { text: { zh: "氧氣耗盡 -> 溺水結局 (5-8)", en: "Oxygen Low -> Fail (5-8)" }, nextScene: "5-8" } 
+            ] 
+        },
+
+        "4-8": { 
+            video: "4-8.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "靈魂獻祭 -> 寒霜巨龍B (5-4)", en: "Sacrifice -> Dragon B (5-4)" }, nextScene: "5-4" }, 
+                { text: { zh: "感染屍毒 -> 不死結局 (5-5)", en: "Infected -> Fail (5-5)" }, nextScene: "5-5" } 
+            ] 
+        },
+
+        // --- 第 4 層的失敗結局 ---
+        "5-5": { video: "5-5.mp4", nextType: "ending_modal", modalData: { message: { zh: "你變成了不死族的一員<br>永遠徘徊在墓地", en: "You joined the Undead." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-6": { video: "5-6.mp4", nextType: "ending_modal", modalData: { message: { zh: "CIA將你關進了黑牢<br>冒險結束", en: "Captured by CIA." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-7": { video: "5-7.mp4", nextType: "ending_modal", modalData: { message: { zh: "FBI攻堅失敗<br>你死於亂槍之中", en: "Killed in FBI Raid." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "5-8": { video: "5-8.mp4", nextType: "ending_modal", modalData: { message: { zh: "雅特蘭提斯的深海<br>是你最後的歸宿", en: "Lost in the Deep." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+
+        // --- 第 5 層 (Boss戰 - 包含 6-5 逃跑選項) ---
+        "5-1": { 
+            video: "5-1.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "斬殺魔王 -> 國王表揚 (6-1)", en: "Slay Demon -> Good End" }, nextScene: "6-1" }, 
+                { text: { zh: "力氣用盡 -> 戰死沙場 (6-3)", en: "Exhausted -> Fail" }, nextScene: "6-3" },
+                { text: { zh: "轉身逃走 -> 獅鷲離去 (6-5)", en: "Flee -> Griffin Leaves" }, nextScene: "6-5" }
+            ] 
+        },
+
+        "5-2": { 
+            video: "5-2.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "封印魔王 -> 榮耀歸來 (6-1)", en: "Seal Demon -> Good End" }, nextScene: "6-1" }, 
+                { text: { zh: "魔王自爆 -> 同歸於盡 (6-3)", en: "Explosion -> Fail" }, nextScene: "6-3" } 
+            ] 
+        },
+
+        "5-3": { 
+            video: "5-3.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "馴服巨龍 -> 王國英雄 (6-1)", en: "Tame Dragon -> Good End" }, nextScene: "6-1" }, 
+                { text: { zh: "巨龍詛咒 -> 孤獨一生 (6-2)", en: "Cursed -> Bad End" }, nextScene: "6-2" },
+                { text: { zh: "放棄戰鬥 -> 獅鷲離去 (6-5)", en: "Flee -> Griffin Leaves" }, nextScene: "6-5" }
+            ] 
+        },
+
+        "5-4": { 
+            video: "5-4.mp4", nextType: "choice", 
+            choices: [ 
+                { text: { zh: "獅鳩犧牲 -> 少女倖存 (6-2)", en: "Sacrifice -> Bad End" }, nextScene: "6-2" }, 
+                { text: { zh: "冰封吐息 -> 成為冰雕 (6-4)", en: "Frozen -> Fail" }, nextScene: "6-4" } 
+            ] 
+        },
+
+        // --- 第 6 層 (大結局) ---
+        "6-1": { video: "6-1.mp4", nextType: "ending_modal", modalData: { message: { zh: "恭喜！接受國王表揚<br>成為傳奇英雄 (Good End)", en: "Victory! King's Praise.<br>Legendary Hero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-2": { video: "6-2.mp4", nextType: "ending_modal", modalData: { message: { zh: "獅鳩倒在火山口<br>少女孤獨一生 (Bad End)", en: "The Griffin falls.<br>A lonely life awaits." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        
+        "6-3": { video: "6-3.mp4", nextType: "ending_modal", modalData: { message: { zh: "你在最後一刻倒下了<br>世界陷入黑暗", en: "You fell at the end." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        "6-4": { video: "6-4.mp4", nextType: "ending_modal", modalData: { message: { zh: "絕對零度<br>靈魂也被凍結", en: "Absolute Zero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
+        
+        // 新增 6-5 逃跑結局
+        "6-5": { 
+            video: "6-5.mp4", 
+            nextType: "ending_modal", 
+            modalData: { 
+                message: { 
+                    zh: "夥伴遇見了真愛離你而去<br>你將獨自踏上旅程 (Solo End)", 
+                    en: "Your partner found love and left.<br>You walk the path alone." 
+                }, 
+                btnText: { zh: "回到主畫面", en: "Return to Menu" }, 
+                action: "reset" 
+            } 
+        }
+    };
+
+    const entryScreen = document.getElementById('entry-screen');
+    const introVideo = document.getElementById('intro-video');
+    const mainVideo = document.getElementById('main-video');
+    const startScreen = document.getElementById('start-screen');
+    const choiceScreen = document.getElementById('choice-screen');
+    const endingModal = document.getElementById('ending-modal');
+    const menuBgVideo = document.getElementById('menu-bg-video');
+    const skipBtn = document.getElementById('skip-btn');
+    const langSwitch = document.getElementById('lang-switch');
+    const bgm = document.getElementById('bgm');
+
+    // 點擊後觸發：隱藏歡迎頁、播放 Opening
+    function startExperience() {
+        entryScreen.style.opacity = '0'; 
+        setTimeout(() => {
+            entryScreen.style.display = 'none'; 
+            playIntro(); 
+        }, 500);
+    }
+
+    function playIntro() {
+        introVideo.style.display = 'block';
+        // 修正：移除 videos/ 前綴
+        introVideo.src = "opening.mp4"; 
+        
+        introVideo.muted = false;
+        introVideo.play().catch(e => console.log("播放失敗:", e));
+
+        introVideo.onended = function() {
+            introVideo.style.display = 'none';
+            showMainMenu(); 
+        };
+    }
+
+    function showMainMenu() {
+        startScreen.classList.remove('hidden');
+        langSwitch.classList.remove('hidden');
+        menuBgVideo.play();
+        bgm.volume = 0.5;
+        bgm.play().catch(e => console.log("BGM 自動播放被擋"));
+    }
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        if(lang === 'zh') document.querySelector('.lang-btn:first-child').classList.add('active');
+        else document.querySelector('.lang-btn:last-child').classList.add('active');
+
+        document.getElementById('title-text').innerText = uiText[lang].title;
+        document.getElementById('btn-start').innerText = uiText[lang].start;
+        document.getElementById('btn-island').innerText = uiText[lang].island;
+        skipBtn.innerText = uiText[lang].skip;
+
+        if (!choiceScreen.classList.contains('hidden') && activeChoices) {
+            showChoices(activeChoices);
+        }
+        if (!endingModal.classList.contains('hidden') && activeModalData) {
+            document.getElementById('ending-text').innerHTML = activeModalData.message[currentLang];
+            document.getElementById('ending-btn').innerText = activeModalData.btnText[currentLang];
+        }
+    }
+
+    function startGame() {
+        startScreen.classList.add('hidden');
+        endingModal.classList.add('hidden');
+        bgm.pause();
+        bgm.currentTime = 0;
+        menuBgVideo.pause();
+
+        mainVideo.style.display = 'block';
+        playScene("1-1"); 
+    }
+
+    function goIsland() {
+        window.location.href = "https://videodennischiu-oss.github.io/island-adventure/";
+    }
+
+    function skipVideo() {
+        if (mainVideo.style.display === 'block' && !mainVideo.paused) {
+            mainVideo.dispatchEvent(new Event('ended'));
+        }
+    }
+
+    function playScene(sceneId) {
+        const sceneData = storyConfig[sceneId];
+        if (!sceneData) { console.error("Missing scene:", sceneId); return; }
+
+        skipBtn.classList.remove('hidden');
+        // 修正：移除 videos/ 前綴 (已經在 Config 裡拿掉了)
+        mainVideo.src = sceneData.video;
+        mainVideo.play();
+
+        mainVideo.onended = function() {
+            skipBtn.classList.add('hidden');
+            handleSceneEnd(sceneData);
+        };
+    }
+
+    function handleSceneEnd(sceneData) {
+        if (sceneData.nextType === "choice") {
+            showChoices(sceneData.choices);
+        } else if (sceneData.nextType === "direct") {
+            playScene(sceneData.nextScene);
+        } else if (sceneData.nextType === "ending_modal") {
+            showEndingModal(sceneData.modalData);
+        }
+    }
+
+    function showChoices(choices) {
+        activeChoices = choices;
+        const container = document.getElementById('choice-container');
+        container.innerHTML = "";
+        choiceScreen.classList.remove('hidden');
+
+        choices.forEach(choice => {
+            const btn = document.createElement('div');
+            btn.className = 'btn';
+            btn.innerText = choice.text[currentLang];
+            btn.onclick = function() {
+                choiceScreen.classList.add('hidden');
+                activeChoices = null;
+                playScene(choice.nextScene);
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function showEndingModal(data) {
+        activeModalData = data;
+        endingModal.classList.remove('hidden');
+        document.getElementById('ending-text').innerHTML = data.message[currentLang];
+        document.getElementById('ending-btn').innerText = data.btnText[currentLang];
+        currentEndingAction = data.action;
+    }
+
+    function handleEndingAction() {
+        endingModal.classList.add('hidden');
+        activeModalData = null;
+        if (currentEndingAction === "reset") {
+            resetGame();
+        } else if (currentEndingAction === "restart") {
+            startGame();
+        }
+    }
+
+    function resetGame() {
+        mainVideo.pause(); 
+        mainVideo.currentTime = 0; 
+        mainVideo.style.display = 'none'; 
+        mainVideo.src = ""; 
+        skipBtn.classList.add('hidden');
+        showMainMenu(); 
+    }
+
+    setLanguage(currentLang);
+</script>
+
+</body>
+</html>
