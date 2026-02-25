@@ -64,6 +64,7 @@
 
         .hidden { display: none !important; }
 
+        /* 自動播放被擋時顯示的按鈕 */
         #fallback-overlay {
             position: absolute; inset: 0;
             background: rgba(0,0,0,0.8);
@@ -73,6 +74,7 @@
         }
         .fallback-text {
             color: #e0c38c; font-family: 'Cinzel', serif; font-size: 20px; letter-spacing: 4px; border: 1px solid #e0c38c; padding: 15px 30px;
+            animation: pulse 2s infinite;
         }
 
         #lang-switch {
@@ -192,7 +194,7 @@
         <div class="lang-btn" onclick="setLanguage('en')">EN</div>
     </div>
 
-    <video id="intro-video" playsinline webkit-playsinline muted></video>
+    <video id="intro-video" playsinline webkit-playsinline></video>
     <video id="main-video" playsinline webkit-playsinline></video>
 
     <div id="start-screen" class="ui-layer hidden">
@@ -230,7 +232,6 @@
     };
 
     const storyConfig = {
-        // --- 第 1 層 ---
         "1-1": { 
             video: "1-1.mp4", nextType: "choice", 
             choices: [ 
@@ -239,7 +240,6 @@
             ] 
         },
 
-        // --- 第 2 層 (含新增的法師選項) ---
         "2-1": { 
             video: "2-1.mp4", nextType: "choice", 
             choices: [ 
@@ -257,7 +257,6 @@
             ] 
         },
 
-        // --- 第 3 層 (含原路線 + 法師塔分支) ---
         "3-1": { 
             video: "3-1.mp4", nextType: "choice", 
             choices: [ 
@@ -286,8 +285,6 @@
                 { text: { zh: "墓地復甦: 不死族 (4-8)", en: "Graveyard: Undead" }, nextScene: "4-8" } 
             ] 
         },
-
-        // 3-5 (法師A): 傳送到 KGB/終結者
         "3-5": { 
             video: "3-5.mp4", nextType: "choice", 
             choices: [ 
@@ -296,7 +293,6 @@
                 { text: { zh: "偷竊法師 -> 觸發機關 (3-7)", en: "Steal -> Zap (3-7)" }, nextScene: "3-7" }
             ] 
         },
-        // 3-6 (法師B): 傳送到 解放軍/無人機
         "3-6": { 
             video: "3-6.mp4", nextType: "choice", 
             choices: [ 
@@ -305,7 +301,6 @@
                 { text: { zh: "攻擊法師 -> 自取滅亡 (3-7)", en: "Attack -> Zap (3-7)" }, nextScene: "3-7" }
             ] 
         },
-        // 3-7 (電死結局)
         "3-7": { 
             video: "3-7.mp4", 
             nextType: "ending_modal", 
@@ -316,7 +311,6 @@
             } 
         },
 
-        // --- 第 4 層 (依你的文字邏輯) ---
         "4-1": { 
             video: "4-1.mp4", nextType: "choice", 
             choices: [ 
@@ -362,7 +356,7 @@
         "4-7": { 
             video: "4-7.mp4", nextType: "choice", 
             choices: [ 
-                { text: { zh: "深海喚醒 -> 寒霜巨龍B (5-4)", en: "Summon -> Dragon B (5-4)" }, nextScene: "5-4" }, 
+                { text: { zh: "深海召喚 -> 寒霜巨龍B (5-4)", en: "Summon -> Dragon B (5-4)" }, nextScene: "5-4" }, 
                 { text: { zh: "氧氣耗盡 -> 溺水結局 (5-8)", en: "Drown -> Fail (5-8)" }, nextScene: "5-8" } 
             ] 
         },
@@ -374,13 +368,11 @@
             ] 
         },
 
-        // --- 第 4 層的失敗結局 ---
         "5-5": { video: "5-5.mp4", nextType: "ending_modal", modalData: { message: { zh: "你變成了不死族的一員<br>永遠徘徊在墓地", en: "You joined the Undead." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         "5-6": { video: "5-6.mp4", nextType: "ending_modal", modalData: { message: { zh: "CIA將你關進了黑牢<br>冒險結束", en: "Captured by CIA." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         "5-7": { video: "5-7.mp4", nextType: "ending_modal", modalData: { message: { zh: "FBI攻堅失敗<br>你死於亂槍之中", en: "Killed in FBI Raid." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         "5-8": { video: "5-8.mp4", nextType: "ending_modal", modalData: { message: { zh: "雅特蘭提斯的深海<br>是你最後的歸宿", en: "Lost in the Deep." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
 
-        // --- 第 5 層 (Boss戰 - 包含 6-5 逃跑選項) ---
         "5-1": { 
             video: "5-1.mp4", nextType: "choice", 
             choices: [ 
@@ -412,7 +404,6 @@
             ] 
         },
 
-        // --- 第 6 層 (大結局) ---
         "6-1": { video: "6-1.mp4", nextType: "ending_modal", modalData: { message: { zh: "恭喜！接受國王表揚<br>成為傳奇英雄 (Good End)", en: "Legendary Hero." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         "6-2": { video: "6-2.mp4", nextType: "ending_modal", modalData: { message: { zh: "獅鳩倒在火山口<br>少女孤獨一生 (Bad End)", en: "Lonely life." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
         "6-3": { video: "6-3.mp4", nextType: "ending_modal", modalData: { message: { zh: "你在最後一刻倒下了<br>世界陷入黑暗", en: "You fell." }, btnText: { zh: "回到主畫面", en: "Return to Menu" }, action: "reset" } },
@@ -431,14 +422,15 @@
     const bgm = document.getElementById('bgm');
     const fallbackOverlay = document.getElementById('fallback-overlay');
 
-    // ── 自動播放開頭動畫 ──
+    // ── 自動播放開頭動畫 (有聲音) ──
     document.addEventListener('DOMContentLoaded', () => {
         introVideo.src = "opening.mp4";
-        introVideo.muted = true; 
-
+        // 移除 muted，嘗試播放有聲影片
+        
         const p = introVideo.play();
         if(p && p.catch){
             p.catch(e => {
+                // 如果被擋，顯示點擊按鈕
                 fallbackOverlay.classList.remove('hidden');
                 fallbackOverlay.addEventListener('click', () => {
                     introVideo.play();
@@ -458,16 +450,16 @@
         langSwitch.classList.remove('hidden');
         menuBgVideo.play();
         
-        // 修正：主選單時播放背景音樂
+        // 主選單播放 BGM
         bgm.volume = 0.5;
-        bgm.play().catch(e => console.log("BGM 自動播放被擋，等待互動"));
+        bgm.play().catch(e => console.log("BGM 等待互動"));
     }
 
     function startGame() {
         startScreen.classList.add('hidden');
         endingModal.classList.add('hidden');
         
-        // 修正：開始遊戲後，音樂停止
+        // 開始遊戲，停止 BGM
         bgm.pause();
         bgm.currentTime = 0;
         
@@ -580,7 +572,7 @@
         skipBtn.classList.add('hidden');
         
         showMainMenu(); 
-        // 修正：回到主選單時，音樂重新播放
+        // 回主畫面恢復 BGM
         bgm.play().catch(()=>{}); 
     }
 
